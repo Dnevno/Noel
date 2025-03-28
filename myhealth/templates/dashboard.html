@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}
+    MyHealth: Your health, your way
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-row min-vh-100">
+    <div class="d-flex flex-column m-1">
+        <div class="bg-primary p-3">
+            MyHealth Dashboard
+        </div>
+        <div class="bg-light p-3">
+            <h2>{{ userdata.user.username }}</h2>
+            <h5>Email</h5>
+            <p>{{ userdata.user.email }}</p>
+            <h5>Contact number</h5>
+            <p>{{ userdata.phone }}</p>
+            <h5>Address</h5>
+            <p>{{ userdata.address }}</p>
+
+            {% if self_control %}
+                <a href="{% url 'logout' %}" class="btn btn-danger align-self-start mt-1">Log out</a>
+            {% endif %}
+        </div>
+
+        {% if doctor %}
+            <div class="p-3">
+                <p>Patient</p>
+                {% for patient in patients %}
+                    <a href="{% url 'dashboard' patient.patient.user.id %}">{{ patient.patient.user.username }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="container bg-light flex-fill m-1 p-3 ">
+        <div class="d-flex flex-row align-items-center">
+            <h5 class="flex-fill">Health Activities</h5>
+            {% if doctor %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#healthModal">Add Record</button>
+            {% else %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareModal">Share</button>
+            {% endif %}
+        </div>
+
+        {% for record in records %}
+            <div class="container card p-3 mt-2 mb-2">
+                <h4>{{ record.date }}</h4>
+                <h6>By {{ record.doctor.username }} from {{ record.hospital }}</h6>
+                <br>
+                <p>Weight: {{ record.weight }}</p>
+                <p>Height: {{ record.height }}</p>
+                <p>Blood pressure: {{ record.blood_pressure }}</p>
+                <p>Blood sugar: {{ record.blood_sugar }}</p>
+                <p>Cholesterol: {{ record.cholesterol }}</p>
+                <p>Additional notes: {{ record.notes }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="healthModal" tabindex="-1" role="dialog" aria-labelledby="healthModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="healthModalLabel">Doctor</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ health_form }}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>    
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share to</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ share_form }}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>    
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+    MyHealth: Your health, your way
+{% endblock %}
+
+{% block content %}
+<div class="bg-image" style="background-image: url('../static/background.jpg');">
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+        <div>
+            <h1>MyHealth</h1>
+            <form method="POST" action="" novalidate>
+                {% csrf_token %}
+                {{ form }}
+                <input class="form-control btn-primary mb-2" type="submit" value="Login">
+
+                <span class="text-muted">No account? <a href="register/">Register here</a></span>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

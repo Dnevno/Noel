@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+    MyHealth: Doctor Application
+{% endblock %}
+
+{% block content %}
+<div class="bg-image" style="background-image: url('../static/background.jpg');">
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+        <div>
+            <h1>Job Application</h1>
+            <form method="POST" action="" novalidate>
+                {% csrf_token %}
+                {{ form }}
+    
+                <input class="form-control btn-primary mb-2" type="submit" value="Apply">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

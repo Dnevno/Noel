@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+    MyHealth: Registration
+{% endblock %}
+
+{% block content %}
+<div class="bg-image" style="background-image: url('../static/background.jpg');">
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+        <div>
+            <h1>Sign up</h1>
+            <form method="POST" action="" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+    
+                <div>
+                    {{ form.username }}
+                    <p class="text-danger">{{ form.username.errors }}</p>
+                </div>
+    
+                <div>
+                    {{ form.email }}
+                    <p class="text-danger">{{ form.email.errors }}</p>
+                </div>
+    
+                <div>
+                    {{ form.phone }}
+                    <p class="text-danger">{{ form.phone.errors }}</p>
+                </div>
+    
+                <div>
+                    {{ form.password }}
+                    <p class="text-danger">{{ form.password.errors }}</p>
+                </div>
+    
+                <div>
+                    {{ form.confirm_password }}
+                    <p class="text-danger">{{ form.confirm_password.errors }}</p>
+                </div>
+    
+                <div>
+                    {{ form.accept_privacy_policy }}
+                    I agree to the <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>
+                    <p class="text-danger"{{ form.accept_privacy_policy.errors }}></p>
+                </div>
+    
+                <input class="form-control btn-primary mb-2" type="submit" value="Register account">
+
+                <span class="text-muted"><a href="javascript:history.back()">Back to home</a></span>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
