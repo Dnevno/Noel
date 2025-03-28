@@ -1,1 +1,1 @@
-web: gunicorn Noel.wsgi -log-file -
+web: gunicorn Noel.wsgi --log-file -
