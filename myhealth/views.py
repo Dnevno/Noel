@@ -4,14 +4,12 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.urls import reverse
 from .models import MedicalHistory, Userdata, Qualification, Share
-from .forms import LoginForm, RegisterForm, DoctorForm, HealthForm, ShareForm
+from .forms import LoginForm, RegisterForm, PersonalForm, DoctorForm, HealthForm, ShareForm
+import hashlib
+
+def hash_phone(phone):
+    return hashlib.sha256(phone.encode()).hexdigest()
 
 # Create your views here.
 def index(request):
@@ -113,35 +111,59 @@ def dashboard(request, username):
     
     if str(login_user.user.id) == str(username):
         context['self_control'] = True
+        
         if is_doctor:
             context['doctor'] = True
             context['patients'] = Share.objects.filter(shared_with=login_user.user.id)
 
+        profile_form = PersonalForm()
+        share_form = ShareForm()
+
         if request.method == 'POST':
-            share_form = ShareForm(request.POST)
-            if share_form.is_valid():
-                phone = share_form.cleaned_data['phone']
-                password = share_form.cleaned_data['password']
+            form_type = request.POST.get('form_type')
 
-                try:
-                    target_user = Userdata.objects.get(phone=phone)
-                    if not target_user.is_doctor:
-                        messages.error(request, "User is not a doctor")
-                    elif request.user.check_password(password):
-                        share = Share(
-                            patient=login_user,
-                            shared_with=target_user.user.id,
-                        )
-                        share.save()
-                        messages.success(request, "Shared successfully")
-                    else:
-                        messages.error(request, "Invalid password")
-                except Userdata.DoesNotExist:
-                    messages.error(request, "User not found")
+            if form_type == 'profile_form':
+                profile_form = PersonalForm(request.POST)
+                if profile_form.is_valid():
+                    displayed_name = profile_form.cleaned_data['displayed_name']
+                    phone = profile_form.cleaned_data['phone']
+                    address = profile_form.cleaned_data['address']
+                    date_of_birth = profile_form.cleaned_data['date_of_birth']
 
-        else:
-            share_form = ShareForm()
+                    login_user.displayed_name = displayed_name
+                    login_user.phone = phone
+                    login_user.address = address
+                    login_user.date_of_birth = date_of_birth
+                    login_user.save()
 
+                    messages.success(request, "Profile updated successfully")
+                else:
+                    messages.error(request, profile_form.errors)
+
+            elif form_type == 'share_form':
+                share_form = ShareForm(request.POST)
+                if share_form.is_valid():
+                    phone = share_form.cleaned_data['phone']
+                    password = share_form.cleaned_data['password']
+
+                    try:
+                        hashed = hash_phone(phone)
+                        target_user = Userdata.objects.get(phone_hash=hashed)
+                        if not target_user.is_doctor:
+                            messages.error(request, "User is not a doctor")
+                        elif request.user.check_password(password):
+                            share = Share(
+                                patient=login_user,
+                                shared_with=target_user.user.id,
+                            )
+                            share.save()
+                            messages.success(request, "Shared successfully")
+                        else:
+                            messages.error(request, "Invalid password")
+                    except Userdata.DoesNotExist:
+                        messages.error(request, "User not found")
+
+        context['profile_form'] = profile_form
         context['share_form'] = share_form
 
     elif is_doctor:
@@ -152,8 +174,14 @@ def dashboard(request, username):
             if request.method == 'POST':
                 health_form = HealthForm(request.POST)
                 if health_form.is_valid():
+                    try:
+                        patient = Userdata.objects.get(user__id=username)
+                    except Userdata.DoesNotExist:
+                        messages.error(request, "Patient not found.")
+                        return redirect('some_safe_page')
+
                     medical_history = MedicalHistory(
-                        patient=Userdata.objects.get(uid=username),  # Patient's data
+                        patient=patient,  # Patient's data
                         doctor=login_user,  # Logged-in doctor
                         hospital=health_form.cleaned_data['hospital'],
                         weight=health_form.cleaned_data['weight'],
@@ -163,8 +191,11 @@ def dashboard(request, username):
                         cholesterol=health_form.cleaned_data['cholesterol'],
                         notes=health_form.cleaned_data['notes'],
                     )
+
                     medical_history.save()
                     messages.success(request, "Health record added successfully")
+                else:
+                    messages.error(request, health_form.errors)
             else:
                 health_form = HealthForm()
 

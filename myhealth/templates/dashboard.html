@@ -20,7 +20,8 @@
             <p>{{ userdata.address }}</p>
 
             {% if self_control %}
-                <a href="{% url 'logout' %}" class="btn btn-danger align-self-start mt-1">Log out</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#profileModal">Edit profile</button>
+                <a href="{% url 'logout' %}" class="btn btn-danger align-self-start">Log out</a>
             {% endif %}
         </div>
 
@@ -37,7 +38,7 @@
     <div class="container bg-light flex-fill m-1 p-3 ">
         <div class="d-flex flex-row align-items-center">
             <h5 class="flex-fill">Health Activities</h5>
-            {% if doctor %}
+            {% if doctor and not self_control %}
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#healthModal">Add Record</button>
             {% else %}
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareModal">Share</button>
@@ -49,14 +50,35 @@
                 <h4>{{ record.date }}</h4>
                 <h6>By {{ record.doctor.username }} from {{ record.hospital }}</h6>
                 <br>
-                <p>Weight: {{ record.weight }}</p>
-                <p>Height: {{ record.height }}</p>
+                <p>Weight: {{ record.weight }} kg</p>
+                <p>Height: {{ record.height }} cm</p>
                 <p>Blood pressure: {{ record.blood_pressure }}</p>
-                <p>Blood sugar: {{ record.blood_sugar }}</p>
-                <p>Cholesterol: {{ record.cholesterol }}</p>
+                <p>Blood sugar: {{ record.blood_sugar }} mg/dL</p>
+                <p>Cholesterol: {{ record.cholesterol }} mg/dL</p>
                 <p>Additional notes: {{ record.notes }}</p>
             </div>
         {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">Edit profile</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="profile_form">
+                    {{ profile_form }}
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>    
+            </div>
+        </div>
     </div>
 </div>
 
@@ -92,6 +114,7 @@
             <div class="modal-body">
                 <form method="POST" action="" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <input type="hidden" name="form_type" value="share_form">
                     {{ share_form }}
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>    
