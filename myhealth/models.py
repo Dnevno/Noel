@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 from myhealth.utils.crypto import CryptoUtils
+import logging
 
 # Create your models here.
 class Userdata(models.Model):
@@ -19,7 +20,16 @@ class Userdata(models.Model):
 
     @property
     def phone(self):
-        return CryptoUtils.decrypt(self._phone) if self._phone else None
+        if not self._phone:
+            return None
+        try:
+            encrypted_data = (
+                self._phone.tobytes() if isinstance(self._phone, memoryview) else self._phone
+            )
+            return CryptoUtils.decrypt(encrypted_data).decode()
+        except Exception as e:
+            logging.error(f"Decryption failed in model: {e}")
+            return None
     
     @phone.setter
     def phone(self, value):
