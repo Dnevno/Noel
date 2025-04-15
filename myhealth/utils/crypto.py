@@ -14,10 +14,15 @@ class CryptoUtils:
         return fernet.encrypt(text.encode())
 
     @staticmethod
-    def decrypt(data: bytes) -> str:
-        if data is None:
+    def decrypt(data):
+        if not data or not isinstance(data, (bytes, str)):
             return None
-        return fernet.decrypt(data).decode()
+        try:
+            if isinstance(data, str):
+                data = data.encode()
+            return fernet.decrypt(data).decode()
+        except Exception:
+            return None
 
     @staticmethod
     def hash(text: str) -> str:
