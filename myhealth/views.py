@@ -57,11 +57,12 @@ def register(request):
                         user.is_active = True
                         user.save()
 
-                        Userdata.objects.create(
+                        userdata = Userdata(
                             user=user,
                             displayed_name=form.cleaned_data['username'],
-                            phone=form.cleaned_data['phone'],
                         )
+                        userdata.phone = form.cleaned_data['phone']
+                        userdata.save()
                     
                     messages.success(request, 'Account created successfully.')
                     
