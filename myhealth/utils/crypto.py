@@ -18,8 +18,8 @@ class CryptoUtils:
         if not data or not isinstance(data, (bytes, str)):
             return None
         try:
-            if isinstance(data, str):
-                data = data.encode()
+            if isinstance(data, memoryview):
+                data = data.tobytes()
             return fernet.decrypt(data).decode()
         except Exception:
             return None
