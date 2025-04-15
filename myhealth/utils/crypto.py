@@ -1,6 +1,7 @@
 from cryptography.fernet import Fernet
 from django.conf import settings
 import hashlib
+import logging
 
 fernet = Fernet(settings.FERNET_KEY)
 
@@ -22,7 +23,6 @@ class CryptoUtils:
                 data = data.tobytes()
             return fernet.decrypt(data).decode()
         except Exception as e:
-            import logging
             logging.error(f"Decryption failed: {e}")
             return None
 
