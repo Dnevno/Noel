@@ -16,11 +16,13 @@ class CryptoUtils:
 
     @staticmethod
     def decrypt(data):
-        if not data or not isinstance(data, (bytes, str)):
+        if not data:
             return None
         try:
             if isinstance(data, memoryview):
                 data = data.tobytes()
+            if not isinstance(data, (bytes, str)):
+                return None
             return fernet.decrypt(data).decode()
         except Exception as e:
             logging.error(f"Decryption failed: {e}")
