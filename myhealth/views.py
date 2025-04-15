@@ -116,6 +116,7 @@ def dashboard(request, user_id):
         target_user = User.objects.get(id=user_id)
         target_userdata = Userdata.objects.get(user=target_user)
         context['userdata'] = target_userdata
+        print(f"User phone in dashboard: {target_userdata.phone}")
         context['records'] = MedicalHistory.objects.filter(patient=target_userdata)
     except User.DoesNotExist:
         messages.error(request, "Userdata not found.")
