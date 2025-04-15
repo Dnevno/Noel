@@ -21,7 +21,9 @@ class CryptoUtils:
             if isinstance(data, memoryview):
                 data = data.tobytes()
             return fernet.decrypt(data).decode()
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.error(f"Decryption failed: {e}")
             return None
 
     @staticmethod
