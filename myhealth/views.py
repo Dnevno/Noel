@@ -14,7 +14,7 @@ def hash_phone(phone):
 # Create your views here.
 def index(request):
     if request.user.is_authenticated:
-        return redirect('dashboard', username=request.user.id)
+        return redirect('dashboard', user_id=request.user.id)
 
     else:
         if request.method == 'POST':
@@ -26,7 +26,7 @@ def index(request):
                 user = authenticate(request, username=email, password=password)
                 if user is not None:
                     login(request, user)
-                    return redirect('dashboard', username=user.id)
+                    return redirect('dashboard', user_id=user.id)
                 else:
                     messages.error(request, 'Invalid phone number or password')
         else:
@@ -57,7 +57,7 @@ def register(request):
                         user.is_active = True
                         user.save()
 
-                        userdata = Userdata.objects.create(
+                        Userdata.objects.create(
                             user=user,
                             displayed_name=form.cleaned_data['username'],
                             phone=form.cleaned_data['phone'],
@@ -66,7 +66,7 @@ def register(request):
                     messages.success(request, 'Account created successfully.')
                     
                     login(request, user)
-                    return redirect('dashboard', username=user.id)
+                    return redirect('dashboard', user_id=user.id)
                 except Exception as e:
                     messages.error(request, f'An error occurred. Please try again later.  {e}')
     else:
@@ -103,18 +103,35 @@ def privacy_policy(request):
     return render(request, 'privacy_policy.html')
 
 @login_required
-def dashboard(request, username):
+def dashboard(request, user_id):
     #check if user is authenticated
     context = {}
-    login_user = Userdata.objects.get(user=request.user)
+    try:
+        login_user = Userdata.objects.get(user=request.user)
+    except Userdata.DoesNotExist:
+        messages.error(request, "User not found.")
+        return render(request, 'not_allow.html')
+    
+    try:
+        target_user = User.objects.get(id=user_id)
+        target_userdata = Userdata.objects.get(user=target_user)
+        context['userdata'] = target_userdata
+        context['records'] = MedicalHistory.objects.filter(patient=target_userdata)
+    except User.DoesNotExist:
+        messages.error(request, "Userdata not found.")
+        return render(request, 'not_allow.html')
+    except Userdata.DoesNotExist:
+        messages.error(request, "Userdata not found.")
+        return render(request, 'not_allow.html')
+    
     is_doctor = login_user.is_doctor
     
-    if str(login_user.user.id) == str(username):
+    if str(request.user.id) == str(user_id):
         context['self_control'] = True
         
         if is_doctor:
             context['doctor'] = True
-            context['patients'] = Share.objects.filter(shared_with=login_user.user.id)
+            context['patients'] = Share.objects.filter(shared_with=request.user.id)
 
         profile_form = PersonalForm()
         share_form = ShareForm()
@@ -148,13 +165,13 @@ def dashboard(request, username):
 
                     try:
                         hashed = hash_phone(phone)
-                        target_user = Userdata.objects.get(phone_hash=hashed)
-                        if not target_user.is_doctor:
+                        target_doctor = Userdata.objects.get(phone_hash=hashed)
+                        if not target_doctor.is_doctor:
                             messages.error(request, "User is not a doctor")
                         elif request.user.check_password(password):
                             share = Share(
                                 patient=login_user,
-                                shared_with=target_user.user.id,
+                                shared_with=target_doctor.user.id,
                             )
                             share.save()
                             messages.success(request, "Shared successfully")
@@ -167,7 +184,7 @@ def dashboard(request, username):
         context['share_form'] = share_form
 
     elif is_doctor:
-        shared_patient = Share.objects.filter(shared_with=login_user.user.id).exists()
+        shared_patient = Share.objects.filter(shared_with=request.user.id).exists()
         if shared_patient:
             context['doctor'] = True
 
@@ -175,7 +192,7 @@ def dashboard(request, username):
                 health_form = HealthForm(request.POST)
                 if health_form.is_valid():
                     try:
-                        patient = Userdata.objects.get(user__id=username)
+                        patient = Userdata.objects.get(user__id=user_id)
                     except Userdata.DoesNotExist:
                         messages.error(request, "Patient not found.")
                         return redirect('some_safe_page')
@@ -206,8 +223,6 @@ def dashboard(request, username):
     else:
         return render(request, 'not_allow.html')
 
-    context['userdata'] = Userdata.objects.get(user=User.objects.get(id=username))
-    context['records'] = MedicalHistory.objects.filter(patient=Userdata.objects.get(user=User.objects.get(id=username)))
     return render(request, 'dashboard.html', context)
 
 def testing(request):
