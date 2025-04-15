@@ -23,12 +23,10 @@ class Userdata(models.Model):
         if not self._phone:
             return None
         try:
-            encrypted_data = (
-                self._phone.tobytes() if isinstance(self._phone, memoryview) else self._phone
-            )
+            encrypted_data = self._phone.tobytes() if isinstance(self._phone, memoryview) else self._phone
             return CryptoUtils.decrypt(encrypted_data).decode()
         except Exception as e:
-            logging.error(f"Decryption failed in model: {e}")
+            logging.error(f"Decryption failed in phone: {e}")
             return None
     
     @phone.setter
@@ -42,16 +40,30 @@ class Userdata(models.Model):
 
     @property
     def address(self):
-        return CryptoUtils.decrypt(self._address) if self._address else None
-    
+        if not self._address:
+            return None
+        try:
+            encrypted_data = self._address.tobytes() if isinstance(self._address, memoryview) else self._address
+            return CryptoUtils.decrypt(encrypted_data).decode()
+        except Exception as e:
+            logging.error(f"Decryption failed in address: {e}")
+            return None
+
     @address.setter
     def address(self, value):
         self._address = CryptoUtils.encrypt(value) if value else None
 
     @property
     def date_of_birth(self):
-        return CryptoUtils.decrypt(self._date_of_birth) if self._date_of_birth else None
-    
+        if not self._date_of_birth:
+            return None
+        try:
+            encrypted_data = self._date_of_birth.tobytes() if isinstance(self._date_of_birth, memoryview) else self._date_of_birth
+            return CryptoUtils.decrypt(encrypted_data).decode()
+        except Exception as e:
+            logging.error(f"Decryption failed in date_of_birth: {e}")
+            return None
+
     @date_of_birth.setter
     def date_of_birth(self, value):
         self._date_of_birth = CryptoUtils.encrypt(value) if value else None
