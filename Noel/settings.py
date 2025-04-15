@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
-FERNET_KEY = os.environ.get('FERNET_KEY')
+FERNET_KEY = os.environ.get('FERNET_KEY').encode()
 if not FERNET_KEY:
     raise ValueError("FERNET_KEY environment variable not set")
 
