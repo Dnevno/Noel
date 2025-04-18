@@ -13,6 +13,7 @@ class Userdata(models.Model):
     phone_hash = models.CharField(max_length=64, db_index=True, null=True)
     _address = models.BinaryField(db_column="address", editable=False, null=True)
     _date_of_birth = models.BinaryField(db_column="date_of_birth", editable=False, null=True)
+    verification_sent_at = models.DateTimeField(null=True, blank=True)
     is_doctor = models.BooleanField(default=False)
 
     def __str__(self):

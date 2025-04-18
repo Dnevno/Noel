@@ -138,6 +138,11 @@ def resend_verification(request):
                 reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
             )
 
+            # Update verification_sent_at timestamp
+            userdata = Userdata.objects.get(user=user)
+            userdata.verification_sent_at = now()
+            userdata.save()
+
             send_mail(
                 subject='Verify your email',
                 message=f'Click this link to verify your email: {verify_url}',
@@ -151,9 +156,14 @@ def resend_verification(request):
     return render(request, 'verify_email.html')
 
 def is_token_expired(user, allowed_minutes=60):
-    timestamp = user.date_joined or user.last_login
+    try:
+        userdata = Userdata.objects.get(user=user)
+        timestamp = userdata.verification_sent_at
+    except Userdata.DoesNotExist:
+        return True
+    
     if timestamp is None:
-        return True  # no reference time available
+        return True
     return now() > timestamp + timedelta(minutes=allowed_minutes)
 
 @login_required
