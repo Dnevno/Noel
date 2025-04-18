@@ -92,7 +92,7 @@ def register(request):
                     send_mail(
                         subject="Verify your email",
                         message=f"Click the link to verify your email: {verify_url}",
-                        from_email="no-reply@myhealth.com",
+                        from_email="dailylim1995@gmail.com",
                         recipient_list=[email],
                     )                    
 
@@ -130,8 +130,7 @@ def resend_verification(request):
         try:
             user = User.objects.get(username=email)
             if user.is_active:
-                messages.info(request, "Account is already verified.")
-                return redirect('')
+                return redirect('index')
             
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
@@ -142,14 +141,13 @@ def resend_verification(request):
             send_mail(
                 subject='Verify your email',
                 message=f'Click this link to verify your email: {verify_url}',
-                from_email='no-reply@yourdomain.com',
+                from_email='dailylim1995@gmail.com',
                 recipient_list=[email],
             )
-            messages.success(request, "Verification email resent.")
-            return redirect('')
+            return redirect('register')
         except User.DoesNotExist:
             messages.error(request, "Email not found.")
-    return redirect('register')
+    return render(request, 'resend_confirmation.html')
 
 def is_token_expired(user, allowed_minutes=60):
     timestamp = user.date_joined or user.last_login
