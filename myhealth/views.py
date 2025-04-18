@@ -144,7 +144,8 @@ def resend_verification(request):
                 from_email='dailylim1995@gmail.com',
                 recipient_list=[email],
             )
-            return redirect('register')
+
+            messages.success(request, 'A new verification email has been sent to your email address. Please check your inbox and click the link to verify your account.')
         except User.DoesNotExist:
             messages.error(request, "Email not found.")
     return render(request, 'verify_email.html')
