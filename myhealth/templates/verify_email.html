@@ -11,7 +11,7 @@
         <div class="alert alert-success">
             Your email has been verified. You can now <a href="{% url 'index' %}">log in</a>.
         </div>
-    {% elif expired %}
+    {% else %}
         <div class="alert alert-danger">
             This verification link has expired. You can request a new one below.
         </div>
@@ -20,10 +20,6 @@
             <input type="hidden" name="email" value="{{ email }}">
             <button type="submit" class="btn btn-primary">Resend Verification Email</button>
         </form>
-    {% else %}
-        <div class="alert alert-danger">
-            This verification link is invalid.
-        </div>
     {% endif %}
 </div>
 {% endblock %}
