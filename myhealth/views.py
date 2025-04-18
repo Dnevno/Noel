@@ -147,7 +147,7 @@ def resend_verification(request):
             return redirect('register')
         except User.DoesNotExist:
             messages.error(request, "Email not found.")
-    return render(request, 'resend_confirmation.html')
+    return render(request, 'verify_email.html')
 
 def is_token_expired(user, allowed_minutes=60):
     timestamp = user.date_joined or user.last_login
