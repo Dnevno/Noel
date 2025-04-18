@@ -24,7 +24,7 @@ class Userdata(models.Model):
             return None
         try:
             encrypted_data = self._phone.tobytes() if isinstance(self._phone, memoryview) else self._phone
-            return CryptoUtils.decrypt(encrypted_data).decode()
+            return CryptoUtils.decrypt(encrypted_data)
         except Exception as e:
             logging.error(f"Decryption failed in phone: {e}")
             return None
@@ -44,7 +44,7 @@ class Userdata(models.Model):
             return None
         try:
             encrypted_data = self._address.tobytes() if isinstance(self._address, memoryview) else self._address
-            return CryptoUtils.decrypt(encrypted_data).decode()
+            return CryptoUtils.decrypt(encrypted_data)
         except Exception as e:
             logging.error(f"Decryption failed in address: {e}")
             return None
@@ -59,7 +59,7 @@ class Userdata(models.Model):
             return None
         try:
             encrypted_data = self._date_of_birth.tobytes() if isinstance(self._date_of_birth, memoryview) else self._date_of_birth
-            return CryptoUtils.decrypt(encrypted_data).decode()
+            return CryptoUtils.decrypt(encrypted_data)
         except Exception as e:
             logging.error(f"Decryption failed in date_of_birth: {e}")
             return None

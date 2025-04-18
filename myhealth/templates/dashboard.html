@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filters %}
 
 {% block title %}
     MyHealth: Your health, your way
@@ -33,6 +34,14 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+        {% if self_control %}
+            <span class="text-muted"><a href="{% url 'register_doctor' %}">Apply as a doctor</a></span>
+        {% endif %}
+
+        {% if referer and not referer|urlcontains:"" and not referer|urlcontains:"/register" %}
+            <span class="text-muted"><a href="{{ referer }}">Back to home</a></span>
+        {% endif %}
     </div>
     
     <div class="container bg-light flex-fill m-1 p-3 ">
@@ -48,7 +57,7 @@
         {% for record in records %}
             <div class="container card p-3 mt-2 mb-2">
                 <h4>{{ record.date }}</h4>
-                <h6>By {{ record.doctor.username }} from {{ record.hospital }}</h6>
+                <h6>By {{ record.doctor.user.username }} from {{ record.hospital }}</h6>
                 <br>
                 <p>Weight: {{ record.weight }} kg</p>
                 <p>Height: {{ record.height }} cm</p>
