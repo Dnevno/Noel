@@ -92,7 +92,7 @@ def register(request):
                     send_mail(
                         subject="Verify your email",
                         message=f"Click the link to verify your email: {verify_url}",
-                        from_email="dailylim1995@gmail.com",
+                        from_email="noelanthonyraj@gmail.com",
                         recipient_list=[email],
                     )                    
 
@@ -146,7 +146,7 @@ def resend_verification(request):
             send_mail(
                 subject='Verify your email',
                 message=f'Click this link to verify your email: {verify_url}',
-                from_email='dailylim1995@gmail.com',
+                from_email='noelanthonyraj@gmail.com',
                 recipient_list=[email],
             )
 
